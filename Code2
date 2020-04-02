@@ -1,0 +1,126 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class body : MonoBehaviour
+{
+    //Part of Script for Gravity
+
+
+
+
+    public static List<body> bodies;
+    //Organising bodies as a list was an extra step taken for optimization, with more
+    //objects listing them and adding them as shown makes the code more efficient.
+
+
+    const float G = 667.4f;
+    public Rigidbody rb;
+   
+    void FixedUpdate()
+    {
+        foreach (body Body in bodies)
+        {
+            if (Body != this)
+                Attract(Body);
+        }
+    }
+
+    //OnEnable is in conjunction with the newly created list, it adds objects to the list of bodies
+    //that act under the gravitational force when the object is enabled.
+    void OnEnable()
+    {
+    //This line to initialize the array.
+        if (bodies == null)
+            bodies = new List<body>();
+
+        bodies.Add(this);
+    }
+
+    void OnDisable()
+    {
+        bodies.Remove(this);
+    }
+
+    //doing this makes the code perform faster, less choppy, when more objects are involved.
+
+
+    void Attract(body objToAttract)
+    {
+        Rigidbody rbToAttract = objToAttract.rb;
+
+        Vector3 direction = rb.position - rbToAttract.position;
+        float distance = direction.magnitude;
+
+        if (distance == 0f)
+            return;
+
+        float forceMagnitude = G * (rb.mass * rbToAttract.mass) / Mathf.Pow(distance, 2);
+        Vector3 force = direction.normalized * forceMagnitude;
+
+        rbToAttract.AddForce(force);
+
+    }
+
+    //Part of Script for Initial Velocity
+    
+    //This is a more manual way to achieve orbital velocity, there was a lot of difficulty in intially getting it to work solely reliant on computations done in the script, 
+    //The first thing to try in that case is to see if manually inputting values for the orbital velocity will achieve circular orbits, in order to verify that circular
+    //orbits can be achieved.
+
+    //This public Vector3 is directly inputted into the inspector, if this hadn't been improved upon then there would have been a table involved to show the necessary
+    //calculations to calculate the initial velocities.
+    public Vector3 initialvelocity;
+    public Vector3 OrbitNormal;
+    GameObject SunRB;
+    Transform SunTransform;
+    float SunMass;
+
+    //This part is not necessary, it can be skipped by dragging and dropping objects into the inspector to define the mass and distance in order to define the orbital 
+    //velocity, this was just to have less tedious work, not having to drag and drop the Sun for every planet or object added into the solar system.
+    //Also could have been skipped if the Sun was defined at (0,0,0), it seemed more efficient this way.
+    //Note: at this stage moons were not yet involved, just the Sun and its immediate planets.
+    private void Start()
+    {
+        SunRB = GameObject.Find("Sun");
+        SunMass = SunRB.GetComponent<Rigidbody>().mass;
+        SunTransform = SunRB.GetComponent<Transform>();
+        rb = this.GetComponent<Rigidbody>();
+
+
+        SetVelocity(initialvelocity);
+        if (initialvelocity == Vector3.zero)
+        {
+            SetOrbitalVelocity(OrbitNormal);
+        }
+
+
+
+    }
+    void SetOrbitalVelocity(Vector3 normal)
+        {
+            Vector3 r = rb.position - SunTransform.position;
+
+            //Getting the vector r, takes the current body and subtracts the Sun's position.
+
+            float magnitude = r.magnitude;
+
+        //Taking the magnitude of the direction vector r, giving the distance between a planetary body and the Sun, no matter where the Sun is place.
+
+            Vector3 unitTangent = Vector3.Cross(normal, r);
+            Vector3 orbitalVelocity = Mathf.Sqrt(G * SunMass / Mathf.Pow(magnitude, 3)) * unitTangent;
+
+        //The magnitude is to the power of 3 because of the unitTangent, when multiplied out it gives the same equation as Equation 6 in the report.
+        // 1/r^3 is the same as 1/r*1/r^2, the square root of 1/r^2 is 1/r which gets cancelled out by the unitTangent term.
+        //It was not possible to leave out the unit Tangent term; meaning that the equation had to be the magnitude to the third power with the unitTangent
+        //it would not work without as the squareroot of 1/magnitude.
+
+            initialvelocity = orbitalVelocity;
+            SetOrbitalVelocity(initialvelocity);
+        }
+
+    void SetVelocity(Vector3 velocity)
+        {
+            rb.velocity = velocity;
+        }
+}
