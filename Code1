@@ -1,0 +1,32 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Body : MonoBehaviour
+{
+    const float G = 6.674f;
+    public Rigidbody rb;
+
+    void FixedUpdate()
+    {
+        Body[] bodies = FindObjectsOfType<Body>();
+        foreach (Body body in bodies)
+        {
+            if (body != this)
+                Attract(body);
+        }
+    }
+    void Attract (Body objToAttract)
+    {
+        Rigidbody rbToAttract = objToAttract.rb;
+
+        Vector3 direction = rb.position - rbToAttract.position;
+        float distance = direction.magnitude;
+
+        float forceMagnitude = G * (rb.mass * rbToAttract.mass) / Mathf.Pow(distance, 2);
+        Vector3 force = direction.normalized * forceMagnitude;
+
+        rbToAttract.AddForce(force);
+
+    }
+}
