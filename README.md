@@ -6,4 +6,4 @@ This repository contains code for the Astrophysics Simulation project, delivered
 
 All C# code is included, however the .AI files are not, for copyright infringement purposes. The C# code is separated into final implemented code and other, which will be test or intermediate working code.
 
-Lastly, the final run through for the project (on the Unity interface) is uploaded to youtube, and can be accessed [here](https://www.youtube.com/watch?v=Cuq8VIjVEHc&t=11s)
+Lastly, the final run through for the project (on the Unity interface) is uploaded to Youtube, and can be accessed [here](https://www.youtube.com/watch?v=Cuq8VIjVEHc&t=11s). All other supplementary videos that complement the development process can be accessed in this Youtube [playlist](https://www.youtube.com/playlist?list=PLk04vZL3eJtP7moeVNKAL8wm_yTUieotg).
