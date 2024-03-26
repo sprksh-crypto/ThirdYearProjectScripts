@@ -1,0 +1,117 @@
+ private void Start()
+
+    {
+
+        setOrbitalVelocity(centerBody);
+
+    }
+
+
+
+    private void setOrbitalVelocity(GravityBody body)
+
+    {
+
+        if (!orbitingMap.ContainsKey(body)) return;
+
+
+
+        foreach (GravityBody orbitingBody in orbitingMap[body])
+
+        {
+
+            Vector3 vector = orbitingBody.transform.position - body.transform.position;
+
+
+
+            float forceMultiplier = 1f;
+
+
+
+            if (forceMultMap.ContainsKey(body))
+
+            {
+
+                forceMultiplier = forceMultMap[body];
+
+            }
+
+
+
+            float initialDisplacementY =
+
+                (float) (Math.Sin(orbitingBody.inclination * Math.PI / 180) * vector.magnitude) + body.InitialDisplacementY;
+
+            orbitingBody.InitialDisplacementY = initialDisplacementY;
+
+            orbitingBody.transform.Translate(Vector3.up * initialDisplacementY);
+
+            
+
+            vector = orbitingBody.transform.position - body.transform.position;
+
+            Vector3 orbitNormal = Vector3.Cross(new Vector3(0, 1, 0), vector);
+
+
+
+            orbitingBody.circularOrbit = orbitingBody.circularOrbit || orbitingBody.semiMajor == Vector3.zero;
+
+
+
+            if (orbitingBody.circularOrbit)
+
+            {
+
+                orbitingBody.semiMajor = vector;
+
+            }
+
+
+
+            orbitingBody.Perihelion = vector.magnitude;
+
+            orbitingBody.Apohelion = (orbitingBody.semiMajor.magnitude * 2) - vector.magnitude;
+
+
+
+            float relativeVelocity =
+
+                (float) Math.Sqrt(
+
+                    (Simulation.G * 2 * forceMultiplier * (orbitingBody.getMass() + body.getMass()) * orbitingBody.Apohelion) /
+
+                    (orbitingBody.Perihelion * (orbitingBody.Perihelion + orbitingBody.Apohelion)));
+
+            float inverseMassRatio = (1 - (orbitingBody.getMass() / (orbitingBody.getMass() + body.getMass())));
+
+
+
+
+
+            orbitingBody.rigidBody.velocity = (orbitNormal.normalized * (relativeVelocity * inverseMassRatio)) +
+
+                                              body.initialVelocity;
+
+            orbitingBody.initialVelocity = orbitingBody.rigidBody.velocity;
+
+
+
+            body.rigidBody.velocity -= orbitNormal.normalized * (relativeVelocity * (1 - inverseMassRatio));
+
+            body.initialVelocity = body.rigidBody.velocity;
+
+
+
+            orbitingBody.transform.Rotate(orbitNormal, orbitingBody.axialTilt);
+
+            orbitingBody.setRotationAxisVector(Vector3.up);
+
+
+
+            setOrbitalVelocity(orbitingBody);
+
+        }
+
+    }
+
+}

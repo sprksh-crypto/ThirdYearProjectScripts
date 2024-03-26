@@ -1,0 +1,82 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+
+
+public class MenuButton : MonoBehaviour
+{
+    [SerializeField] int thisButtonIndex;
+    [SerializeField] GameObject thisButtonTarget;
+    [SerializeField] string loadSceneName;
+
+    private MenuController menuController;
+    private Animator animator;
+    private AnimatorFunctions animatorFunctions;
+    public static bool transitioning = false;
+
+    private void Start()
+    {
+        Time.timeScale = 1;
+
+        // Every menu button must be a child of a gameobject that contains a Menu Controller script
+        menuController = transform.parent.GetComponent<MenuController>();
+        animator = GetComponent<Animator>();
+        animatorFunctions = GetComponent<AnimatorFunctions>();
+    }
+
+    IEnumerator DelayAndLoadScene()
+    {
+
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene(loadSceneName);
+    }
+
+    private void Update()
+    {
+        if (menuController.index == thisButtonIndex)
+        {
+            animator.SetBool("selected", true);
+
+            // Transitioning is false to begin with, calls once
+            if ((Input.GetKeyUp(KeyCode.Space) || Input.GetKeyUp(KeyCode.KeypadEnter)) && !transitioning)
+            {
+
+                animator.Play("pressed");
+
+                // If there is a scene to load
+                if (loadSceneName != "")
+                {
+                    Debug.Log("target scene exists for button: " + transform.name);
+                    StartCoroutine(DelayAndLoadScene());
+
+                    // Transition set to true so coroutine is never called again above
+                    transitioning = true;
+                }
+
+                // If no scene to load; i.e. there is some target we want our button to load
+                else if (thisButtonTarget)
+                {
+                    thisButtonTarget.SetActive(true);
+                    menuController.ResetIndexToZero();
+                    transform.parent.gameObject.SetActive(false);
+                }
+            }
+                
+            else if (animator.GetBool("pressed"))
+            {
+                animator.SetBool("pressed", false);
+                animatorFunctions.disableOnce = true;
+            }
+
+        }
+
+        else
+        {
+            animator.SetBool("selected", false);
+        }
+
+    }
+}

@@ -1,0 +1,102 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+
+
+public class MenuButton : MonoBehaviour
+{
+    [SerializeField] MenuController menuController;
+    [SerializeField] AnimatorFunctions animatorFunctions;
+    [SerializeField] int thisIndex;
+    [SerializeField] Canvas Optionsmenucanvas;
+    [SerializeField] Animator animator;
+
+    public static bool transitioning = false;
+
+    private void Start()
+    {
+        Time.timeScale = 1;
+    }
+    IEnumerator Delay()
+    {
+        Debug.Log("Starting wait");
+        yield return new WaitForSeconds(0.3f);
+        Debug.Log("Finished wait");
+
+        // Sets up for different cases of what index is equal to 
+        switch (thisIndex)
+        {
+            // If index = 0
+            case 0:
+                Debug.Log("Load scene 0");
+                SceneManager.LoadScene("GameScene");
+                break;
+
+            case 1:
+                Debug.Log("Load scene 1");
+                SceneManager.LoadScene("StatsScene");
+                break;
+
+            case 2:
+                Debug.Log("Load scene 2");
+                SceneManager.LoadScene("PhenomenaScene");
+                break;
+            
+            case 3:
+                Debug.Log("Load scene 3");
+                SceneManager.LoadScene("ExtrasScene");
+                break;
+
+            case 4:
+                Debug.Log("Load scene 4");
+                Optionsmenucanvas.gameObject.SetActive(true);
+                break;
+
+            case 5:
+                Debug.Log("Load scene 5");
+                SceneManager.LoadScene("CreditsScene");
+                break;
+
+            case 6:
+                Debug.Log("Quit");
+                Application.Quit();
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void Update()
+    {
+        if (menuController.index == thisIndex)
+        {
+            animator.SetBool("selected", true);
+
+            // Transitioning is false to begin with, calls once
+            if (Input.GetAxis("Submit") == 1 && !transitioning)
+            {
+                animator.Play("pressed");
+                StartCoroutine(Delay());
+
+
+                // Transition set to true so coroutine is never called again above
+                transitioning = true;
+
+            }
+            else if (animator.GetBool("pressed"))
+            {
+                animator.SetBool("pressed", false);
+                animatorFunctions.disableOnce = true;
+            }
+        }
+        else
+        {
+            animator.SetBool("selected", false);
+        }
+
+    }
+}

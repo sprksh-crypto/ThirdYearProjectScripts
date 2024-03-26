@@ -1,0 +1,68 @@
+public class MovingSphere : MonoBehaviour
+{
+    public static List<MovingSphere> bodies;
+    public Rigidbody rb;
+    const float G = 10;
+    GameObject Sun;
+    float SunMass;
+    Transform SunTransform;
+    
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        Sun = GameObject.Find("Sun");
+        SunMass = Sun.GetComponent<Rigidbody>().mass;                                                      //These 'Sun' variables needed to be previously and seperately defined; otherwise by calling these properties as extensions of "Sun" it yields a 'stackoverflow' error.
+        SunTransform = Sun.GetComponent<Transform>();                                                     //Needed to call position as a property of 'Transform' instead of as a property of 'Rigidbody'; Unity doesn't deal with it well otherwise, produces errors.
+
+        if (this.gameObject.name != "Sun")
+        {
+            Vector3 r = rb.position - SunTransform.position;
+            float magnitude = r.magnitude;
+            Vector3 unitTangent = Vector3.Cross(new Vector3(0, 1, 0), r.normalized);
+            Vector3 orbitalVelocity = Mathf.Sqrt(G * SunMass / magnitude) * unitTangent;
+            rb.velocity = orbitalVelocity;
+        }
+    }
+    public void AdjustSpeed(float time)
+    {
+        Time.timeScale = time;
+    }
+    //Time.timeScale is out of range. When running in the editor this value needs to be less than or equal to 100.0 UnityEngine.Time:set_timeScale(Single)
+
+    void FixedUpdate()
+    {
+        foreach (MovingSphere Body in bodies)
+        {
+            if (Body != this)
+                Attract(Body);
+        }
+    }
+    void OnEnable()
+    {
+        if (bodies == null)
+            bodies = new List<MovingSphere>();
+
+        bodies.Add(this);
+    }
+    void OnDisable()
+    {
+        bodies.Remove(this);
+    }
+
+    void Attract(MovingSphere objToAttract)
+    {
+        Rigidbody rbToAttract = objToAttract.rb;
+
+        Vector3 direction = rb.position - rbToAttract.position;
+        float distance = direction.magnitude;
+
+        if (distance == 0f)
+            return;
+
+        float forceMagnitude = G * (rb.mass * rbToAttract.mass) / Mathf.Pow(distance, 2);
+        Vector3 force = direction.normalized * forceMagnitude;
+
+        rbToAttract.AddForce(force);
+
+    }
+}
