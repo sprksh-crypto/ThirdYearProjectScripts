@@ -1,7 +1,7 @@
-#Swathi Prakash | Project | VR Astrophysics Simulation
+# Swathi Prakash | Project | VR Astrophysics Simulation
 
 
-##Overview
+## Overview
 This repository contains code for the Astrophysics Simulation project, delivered via the Final Year Project in Physics at King's College London in 2020. This project was done using Unity, the game development platform, and C#, the programming language; in order to produce a true-newtonian based model of astrophysical phenomenon. This project spans the spheres of : educational material, modelling methods, game development, UI/UX design, and more. 
 
 All C# code is included, however the .AI files are not, for copyright infringement purposes. The C# code is separated into final implemented code and other, which will be test or intermediate working code.
